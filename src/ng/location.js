@@ -196,7 +196,11 @@ function LocationHashbangUrl(appBase, hashPrefix) {
  * @param {string} hashPrefix hashbang prefix
  */
 function LocationHashbangInHtml5Url(appBase, hashPrefix) {
+
   var appBaseNoFile = stripFile(appBase);
+
+  LocationHashbangUrl.apply(this, arguments);
+
   /**
    * Parse given hashbang url into properties
    * @param {string} url Hashbang url
@@ -215,26 +219,6 @@ function LocationHashbangInHtml5Url(appBase, hashPrefix) {
     matchAppUrl(withoutHashUrl, this);
     this.$$compose();
   };
-
-  /**
-   * Compose hashbang url and update `absUrl` property
-   * @private
-   */
-  this.$$compose = function() {
-    var search = toKeyValue(this.$$search),
-        hash = this.$$hash ? '#' + encodeUriSegment(this.$$hash) : '';
-
-    this.$$url = encodePath(this.$$path) + (search ? '?' + search : '') + hash;
-    this.$$absUrl = appBase + (this.$$url ? hashPrefix + this.$$url : '');
-  };
-
-  this.$$rewrite = function(url) {
-    if(stripHash(appBase) == stripHash(url)) {
-      return url;
-    }
-  }
-
-  var appBaseNoFile = stripFile(appBase);
 
   this.$$rewrite = function(url) {
     var appUrl;

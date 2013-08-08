@@ -553,6 +553,32 @@ describe('$location', function() {
         }
       );
     });
+
+    it('should keep query string in place with basepath', function() {
+      initService(false, '');
+      inject(
+        initBrowser('http://domain.com/base/index.html?a=b', '/base/index.html'),
+        function($rootScope, $location, $browser) {
+          expect($browser.url()).toBe('http://domain.com/base/index.html?a=b');
+          $location.path('/new');
+          $rootScope.$apply();
+          expect($browser.url()).toBe('http://domain.com/base/index.html?a=b#/new');
+        }
+      );
+    });
+
+    it('should keep query string in place with without basepath', function() {
+      initService(false, '');
+      inject(
+        initBrowser('http://domain.com/base/index.html?a=b', ''),
+        function($rootScope, $location, $browser) {
+          expect($browser.url()).toBe('http://domain.com/base/index.html?a=b');
+          $location.path('/new');
+          $rootScope.$apply();
+          expect($browser.url()).toBe('http://domain.com/base/index.html?a=b#/new');
+        }
+      );
+    });
   });
 
 

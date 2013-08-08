@@ -146,7 +146,6 @@ function LocationHtml5Url(appBase, basePrefix) {
  * @param {string} hashPrefix hashbang prefix
  */
 function LocationHashbangUrl(appBase, hashPrefix) {
-  var appBaseNoFile = stripFile(appBase);
 
   /**
    * Parse given hashbang url into properties
@@ -155,7 +154,7 @@ function LocationHashbangUrl(appBase, hashPrefix) {
    */
   this.$$parse = function(url) {
     matchUrl(url, this);
-    var withoutBaseUrl = beginsWith(appBase, url) || beginsWith(appBaseNoFile, url);
+    var withoutBaseUrl = beginsWith(appBase, url);
     if (!isString(withoutBaseUrl)) {
       throw new Error('Invalid url "' + url + '", does not start with "' + appBase +  '".');
     }
@@ -197,7 +196,43 @@ function LocationHashbangUrl(appBase, hashPrefix) {
  * @param {string} hashPrefix hashbang prefix
  */
 function LocationHashbangInHtml5Url(appBase, hashPrefix) {
-  LocationHashbangUrl.apply(this, arguments);
+  var appBaseNoFile = stripFile(appBase);
+  /**
+   * Parse given hashbang url into properties
+   * @param {string} url Hashbang url
+   * @private
+   */
+  this.$$parse = function(url) {
+    matchUrl(url, this);
+    var withoutBaseUrl = beginsWith(appBase, url) || beginsWith(appBaseNoFile, url);
+    if (!isString(withoutBaseUrl)) {
+      throw $locationMinErr('istart', 'Invalid url "{0}", does not start with "{1}".', url, appBase);
+    }
+    var withoutHashUrl = withoutBaseUrl.charAt(0) == '#' ? beginsWith(hashPrefix, withoutBaseUrl) : withoutBaseUrl;
+    if (!isString(withoutHashUrl)) {
+      throw $locationMinErr('nohash', 'Invalid url "{0}", missing hash prefix "{1}".', url, hashPrefix);
+    }
+    matchAppUrl(withoutHashUrl, this);
+    this.$$compose();
+  };
+
+  /**
+   * Compose hashbang url and update `absUrl` property
+   * @private
+   */
+  this.$$compose = function() {
+    var search = toKeyValue(this.$$search),
+        hash = this.$$hash ? '#' + encodeUriSegment(this.$$hash) : '';
+
+    this.$$url = encodePath(this.$$path) + (search ? '?' + search : '') + hash;
+    this.$$absUrl = appBase + (this.$$url ? hashPrefix + this.$$url : '');
+  };
+
+  this.$$rewrite = function(url) {
+    if(stripHash(appBase) == stripHash(url)) {
+      return url;
+    }
+  }
 
   var appBaseNoFile = stripFile(appBase);
 
